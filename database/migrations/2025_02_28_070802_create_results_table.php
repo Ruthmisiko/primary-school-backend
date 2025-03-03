@@ -15,6 +15,13 @@ return new class extends Migration
     {
         Schema::create('results', function (Blueprint $table) {
             $table->id('id');
+            $table->unsignedBigInteger('class_id');
+            $table->unsignedBigInteger('student_id');
+            $table->integer('english');
+            $table->integer('kiswahili');
+            $table->integer('mathematics');
+            $table->integer('cre');
+            $table->integer('science');
             $table->timestamps();
         });
     }

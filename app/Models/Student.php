@@ -23,5 +23,15 @@ class Student extends Model
 
     ];
 
+    public function sclass()
+    {
+        return $this->belongsTo(Sclass::class, 'class_id', 'id');
+    }
+
+
+    public function results()
+    {
+        return $this->hasMany(Result::class, 'student_id', 'id');
+    }
 
 }

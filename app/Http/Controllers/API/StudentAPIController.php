@@ -34,6 +34,8 @@ class StudentAPIController extends AppBaseController
             $request->get('limit')
         );
 
+        $students = Student::with(['sclass', 'results'])->get();
+
         return $this->sendResponse($students->toArray(), 'Students retrieved successfully');
     }
 
@@ -62,6 +64,7 @@ class StudentAPIController extends AppBaseController
         if (empty($student)) {
             return $this->sendError('Student not found');
         }
+        $student = Student::with(['sclass', 'results'])->find($id);
 
         return $this->sendResponse($student->toArray(), 'Student retrieved successfully');
     }
