@@ -34,6 +34,8 @@ class ExamAPIController extends AppBaseController
             $request->get('limit')
         );
 
+        $exams = Exam::with(['sclass'])->get();
+
         return $this->sendResponse($exams->toArray(), 'Exams retrieved successfully');
     }
 

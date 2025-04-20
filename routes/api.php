@@ -47,3 +47,17 @@ Route::resource('exams', App\Http\Controllers\API\ExamAPIController::class)
 
 Route::resource('results', App\Http\Controllers\API\ResultAPIController::class)
     ->except(['create', 'edit']);
+
+
+Route::resource('subjects', App\Http\Controllers\API\subjectAPIController::class)
+    ->except(['create', 'edit']);
+
+Route::resource('dashboards', App\Http\Controllers\API\dashboardAPIController::class)
+    ->except(['create', 'edit']);
+
+Route::resource('payments', App\Http\Controllers\API\PaymentAPIController::class)
+    ->except(['create', 'edit']);
+
+Route::post('/import-students', [App\Http\Controllers\API\StudentAPIController::class, 'importstudents']);
+
+Route::get('/download-students-template', [App\Http\Controllers\API\StudentAPIController::class, 'downloadTemplate']);

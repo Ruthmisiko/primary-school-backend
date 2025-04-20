@@ -24,6 +24,9 @@ class Teacher extends Model
     public static array $rules = [
 
     ];
-
+    public function sclass()
+    {
+        return $this->belongsTo(Sclass::class, 'assigned_class', 'id');
+    }
 
 }

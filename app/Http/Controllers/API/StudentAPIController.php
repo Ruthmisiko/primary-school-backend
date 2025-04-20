@@ -5,6 +5,9 @@ namespace App\Http\Controllers\API;
 use App\Http\Requests\API\CreateStudentAPIRequest;
 use App\Http\Requests\API\UpdateStudentAPIRequest;
 use App\Models\Student;
+use App\Imports\StudentsImport;
+use App\Exports\StudentTemplateExport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Repositories\StudentRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -107,5 +110,21 @@ class StudentAPIController extends AppBaseController
         $student->delete();
 
         return $this->sendSuccess('Student deleted successfully');
+    }
+
+    public function ImportStudents(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv|max:2048',
+        ]);
+
+        Excel::import(new StudentsImport, $request->file('file'));
+
+        return response()->json(['message' => 'Students imported successfully'], 200);
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new StudentTemplateExport(), 'student_upload_template.xlsx');
     }
 }

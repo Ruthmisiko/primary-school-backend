@@ -23,5 +23,9 @@ class Exam extends Model
 
     ];
 
+    public function sclass()
+    {
+        return $this->belongsTo(Sclass::class, 'class_id', 'id');
+    }
 
 }
