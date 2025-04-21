@@ -25,5 +25,8 @@ class Teacher extends Model
 
     ];
 
-
+    public function sclass()
+    {
+        return $this->hasMany(Sclass::class, 'teacher_id');
+    }
 }

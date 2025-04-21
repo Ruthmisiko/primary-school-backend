@@ -10,6 +10,7 @@ class Sclass extends Model
 
     public $fillable = [
         'name',
+        'teacher_id'
     ];
 
     protected $casts = [
@@ -23,5 +24,12 @@ class Sclass extends Model
     {
         return $this->hasMany(Result::class, 'class_id', 'id');
     }
-
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class);
+    }
+    public function students()
+{
+    return $this->hasMany(Student::class);
+}
 }

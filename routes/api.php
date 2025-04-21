@@ -47,3 +47,5 @@ Route::resource('exams', App\Http\Controllers\API\ExamAPIController::class)
 
 Route::resource('results', App\Http\Controllers\API\ResultAPIController::class)
     ->except(['create', 'edit']);
+
+Route::get('/download-student-template', [App\Http\Controllers\API\StudentAPIController::class, 'downloadTemplate'])->name('students.export');

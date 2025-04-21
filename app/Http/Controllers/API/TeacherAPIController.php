@@ -33,6 +33,7 @@ class TeacherAPIController extends AppBaseController
             $request->get('skip'),
             $request->get('limit')
         );
+        $teachers = Teacher::with(['sclass'])->get();
 
         return $this->sendResponse($teachers->toArray(), 'Teachers retrieved successfully');
     }
@@ -62,6 +63,7 @@ class TeacherAPIController extends AppBaseController
         if (empty($teacher)) {
             return $this->sendError('Teacher not found');
         }
+        $teacher = Teacher::with(['sclass'])->find($id);
 
         return $this->sendResponse($teacher->toArray(), 'Teacher retrieved successfully');
     }

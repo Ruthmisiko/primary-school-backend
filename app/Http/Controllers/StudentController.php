@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Flash;
+use Illuminate\Http\Request;
+use App\Exports\StudentsExport;
+use App\Repositories\StudentRepository;
+use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\CreateStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
-use App\Http\Controllers\AppBaseController;
-use App\Repositories\StudentRepository;
-use Illuminate\Http\Request;
-use Flash;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends AppBaseController
 {
@@ -125,4 +127,11 @@ class StudentController extends AppBaseController
 
         return redirect(route('students.index'));
     }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new StudentsExport(), 'students_upload_template.xlsx');
+    }
 }
+
+

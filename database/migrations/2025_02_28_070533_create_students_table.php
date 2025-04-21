@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->id('id');
             $table->string('name');
-            $table->unsignedBigInteger('class_id');
+            $table->string('class_id');
             $table->string('parent');
             $table->string('age');
             $table->float('fee_balance')->nullable();

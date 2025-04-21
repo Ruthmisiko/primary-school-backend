@@ -33,6 +33,7 @@ class SclassAPIController extends AppBaseController
             $request->get('skip'),
             $request->get('limit')
         );
+        $sclasses = Sclass::with(['teacher'])->get();
 
         return $this->sendResponse($sclasses->toArray(), 'Sclasses retrieved successfully');
     }
@@ -62,6 +63,7 @@ class SclassAPIController extends AppBaseController
         if (empty($sclass)) {
             return $this->sendError('Sclass not found');
         }
+        $sclass = Sclass::with(['teacher'])->find($id);
 
         return $this->sendResponse($sclass->toArray(), 'Sclass retrieved successfully');
     }
