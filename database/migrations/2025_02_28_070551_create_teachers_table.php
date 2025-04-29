@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('designation');
             $table->string('email')->unique();
             $table->text('subjects_taught')->nullable();
-            $table->string('assigned_class');
+            $table->string('assigned_class')->nullable();
             $table->timestamps();
         });
     }

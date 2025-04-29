@@ -41,16 +41,47 @@ class ResultController extends AppBaseController
     /**
      * Store a newly created Result in storage.
      */
-    public function store(CreateResultRequest $request)
+    // public function store(CreateResultRequest $request)
+    // {
+    //     $input = $request->all();
+
+    //     $result = $this->resultRepository->create($input);
+
+    //     Flash::success('Result saved successfully.');
+
+    //     return redirect(route('results.index'));
+    // }
+    public function store(Request $request)
     {
-        $input = $request->all();
+        dd($request->all());
+        $validated = $request->validate([
+            'class_id' => 'required|exists:sclasses,id',
+            'student_id' => 'required|exists:students,id',
+            'exam_id' => 'required|exists:exams,id',
+            'result_items' => 'required|array|min:1',
+            'result_items.*.subject_id' => 'required|exists:subjects,id',
+            'result_items.*.marks_obtained' => 'required|integer|min:0|max:100',
+            'result_items.*.grade' => 'nullable|string',
+            'result_items.*.remarks' => 'nullable|string',
+        ]);
 
-        $result = $this->resultRepository->create($input);
+        foreach ($validated['result_items'] as $item) {
+            \App\Models\Result::create([
+                'class_id' => $validated['class_id'],
+                'student_id' => $validated['student_id'],
+                'exam_id' => $validated['exam_id'],
+                'subject_id' => $item['subject_id'],
+                'marks_obtained' => $item['marks_obtained'],
+                'grade' => $item['grade'] ?? null,
+                'remarks' => $item['remarks'] ?? null,
+            ]);
+        }
 
-        Flash::success('Result saved successfully.');
+        \Flash::success('Results saved successfully.');
 
         return redirect(route('results.index'));
     }
+
 
     /**
      * Display the specified Result.

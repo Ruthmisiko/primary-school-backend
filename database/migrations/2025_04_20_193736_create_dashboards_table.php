@@ -13,15 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('results', function (Blueprint $table) {
+        Schema::create('dashboards', function (Blueprint $table) {
             $table->id('id');
-            $table->unsignedBigInteger('class_id');
-            $table->unsignedBigInteger('student_id');
-            $table->unsignedBigInteger('subject_id');
-            $table->unsignedBigInteger('exam_id');
-            $table->integer('marks_obtained');
-            $table->string('grade')->nullable();
-            $table->text('remarks')->nullable();
             $table->timestamps();
         });
     }
@@ -33,6 +26,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::drop('results');
+        Schema::drop('dashboards');
     }
 };

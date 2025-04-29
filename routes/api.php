@@ -45,7 +45,17 @@ Route::resource('cocurriculars', App\Http\Controllers\API\CocurricularAPIControl
 Route::resource('exams', App\Http\Controllers\API\ExamAPIController::class)
     ->except(['create', 'edit']);
 
-Route::resource('results', App\Http\Controllers\API\ResultAPIController::class)
+Route::resource('results', App\Http\Controllers\API\ResultAPIController::class);
+
+Route::resource('subjects', App\Http\Controllers\API\subjectAPIController::class)
     ->except(['create', 'edit']);
 
-Route::get('/download-student-template', [App\Http\Controllers\API\StudentAPIController::class, 'downloadTemplate'])->name('students.export');
+Route::resource('dashboards', App\Http\Controllers\API\dashboardAPIController::class)
+    ->except(['create', 'edit']);
+
+Route::resource('payments', App\Http\Controllers\API\PaymentAPIController::class)
+    ->except(['create', 'edit']);
+
+Route::post('/import-students', [App\Http\Controllers\API\StudentAPIController::class, 'importStudents']);
+
+Route::get('/download-students-template', [App\Http\Controllers\API\StudentAPIController::class, 'downloadTemplate']);

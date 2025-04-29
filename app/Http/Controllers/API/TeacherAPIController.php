@@ -35,6 +35,7 @@ class TeacherAPIController extends AppBaseController
         );
         $teachers = Teacher::with(['sclass'])->get();
 
+        $teachers = Teacher::with(['sclass'])->get();
         return $this->sendResponse($teachers->toArray(), 'Teachers retrieved successfully');
     }
 

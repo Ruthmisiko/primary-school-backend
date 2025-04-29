@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use Flash;
 use Illuminate\Http\Request;
 use App\Exports\StudentsExport;
+use App\Imports\StudentsImport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Repositories\StudentRepository;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\CreateStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
-use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends AppBaseController
 {
@@ -126,6 +127,17 @@ class StudentController extends AppBaseController
         Flash::success('Student deleted successfully.');
 
         return redirect(route('students.index'));
+    }
+
+     public function ImportStudents(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv|max:2048',
+        ]);
+
+        Excel::import(new StudentsImport, $request->file('file'));
+
+        return response()->json(['message' => 'Students imported successfully'], 200);
     }
 
     public function downloadTemplate()

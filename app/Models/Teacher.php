@@ -24,9 +24,9 @@ class Teacher extends Model
     public static array $rules = [
 
     ];
-
     public function sclass()
     {
-        return $this->hasMany(Sclass::class, 'teacher_id');
+        return $this->belongsTo(Sclass::class, 'assigned_class', 'id');
     }
+
 }

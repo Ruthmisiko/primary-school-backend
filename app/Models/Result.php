@@ -8,15 +8,16 @@ class Result extends Model
 {
     public $table = 'results';
 
-    public $fillable = [
-        'english',
+    protected $fillable = [
         'class_id',
         'student_id',
-        'kiswahili',
-        'mathematics',
-        'cre',
-        'science'
+        'exam_id',
+        'subject_id',
+        'marks_obtained',
+        'grade',
+        'remarks',
     ];
+
 
     protected $casts = [
 
