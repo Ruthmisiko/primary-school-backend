@@ -27,59 +27,57 @@ class AuthController extends Controller
 
     }
 
-    public function register(RegisterRequest $request) {
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'username' => 'required|string|unique:users',
+            'email' => 'required|email|unique:users',
+            'phone_number' => 'required|unique:users',
+            'password' => 'required|confirmed|min:6',
+        ]);
 
-            DB::beginTransaction();
-            try {
-                $input = $request->all();
+        $user = User::create([
+            'name' => $request->name,
+            'userType' => 'admin',
+            'username' => $request->username,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+            'password' => Hash::make($request->password),
+        ]);
 
-                if (isset($request->validator) && $request->validator->fails()) {
-                    return response([
-                        'status' => 'failed',
-                        'errors' => $request->validator->errors()
-                    ], 422);
-                }
+        Auth::login($user);
 
-                $token = base64_encode($input['password']);
-
-
-                $user_input['id'] = Str::uuid()->toString();
-                $user_input['name'] = $input['name'];
-                $user_input['email'] = $input['email'];
-                $user_input['username'] = $input['username'];
-                $user_input['status'] = '0';
-                $user_input['phone_number'] = $input['phone_number'];
-                $user_input['userType'] = 'admin';
-                $user_input['userOTP'] = $token;
-                $user_input['password'] =  Hash::make($input['password']);
-                $user_input['remember_token'] = Str::random(10);
-                $user = $this->userRepository->create($user_input);
-
-                $token = $user->createToken('authToken')->accessToken;
-
-                DB::commit();
-
-                return response()->json([
-                    'message' => 'User registered successfully',
-                    'user' => $user,
-                    'token' => $token
-                ], 201);
-
-            } catch (\Exception $e) {
-                DB::rollback();
-                return response()->json(['error' => $e->getMessage()]);
-            }
+        return response()->json(['message' => 'User registered successfully'], 201);
     }
 
-    public function logout(Request $request) {
+    public function login(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
 
-            $token = $request->user()->token();
-            $token->revoke();
-            $response = ['message' => 'You have been successfully logged out!'];
+    $credentials = $request->only('email', 'password');
 
-            return response()->json($response, 200);
+    if (!Auth::guard('web')->attempt($credentials)) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
     }
 
+    $user = Auth::guard('web')->user();
+    $token = $user->createToken('AuthToken')->accessToken;
 
+    return response()->json([
+        'message' => 'Login successful',
+        'token' => $token,
+        'user' => $user
+    ]);
+}
+
+public function logout(Request $request)
+{
+    $request->user()->token()->revoke();
+    return response()->json(['message' => 'Logged out']);
+}
 
 }

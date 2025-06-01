@@ -38,4 +38,15 @@ class Result extends Model
         return $this->belongsTo(Sclass::class, 'class_id', 'id');
     }
 
+    public function exam()
+    {
+        return $this->belongsTo(Exam::class, 'exam_id', 'id');
+    }
+
+    public function subject()
+    {
+        return $this->belongsTo(subject::class, 'subject_id');
+    }
+
+
 }

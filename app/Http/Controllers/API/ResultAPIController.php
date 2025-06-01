@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Result;
+use App\Models\Student;
+use Illuminate\Http\Request;
+use App\Imports\ResultsImport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\JsonResponse;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ResultsTemplateExport;
+use App\Repositories\ResultRepository;
+use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateResultAPIRequest;
 use App\Http\Requests\API\UpdateResultAPIRequest;
-use App\Models\Result;
-use App\Repositories\ResultRepository;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use App\Http\Controllers\AppBaseController;
+
 
 /**
  * Class ResultAPIController
@@ -33,6 +39,7 @@ class ResultAPIController extends AppBaseController
             $request->get('skip'),
             $request->get('limit')
         );
+        $results = Result::with(['sclass', 'exam','student','subject'])->get();
 
         return $this->sendResponse($results->toArray(), 'Results retrieved successfully');
     }
@@ -41,14 +48,28 @@ class ResultAPIController extends AppBaseController
      * Store a newly created Result in storage.
      * POST /results
      */
+
     public function store(CreateResultAPIRequest $request): JsonResponse
-    {
-        $input = $request->all();
+{
+    $input = $request->only(['class_id', 'subject_id', 'exam_id']);
+    $items = $request->input('result_items', []);
 
-        $result = $this->resultRepository->create($input);
+    $savedResults = [];
 
-        return $this->sendResponse($result->toArray(), 'Result saved successfully');
+    foreach ($items as $item) {
+        $data = array_merge($input, [
+            'student_id' => $item['student_id'],
+            'marks_obtained' => $item['marks_obtained'] ?? null,
+            'remarks' => $item['remarks'] ?? null,
+            'grade' => $item['grade'] ?? null,
+        ]);
+
+        $savedResults[] = $this->resultRepository->create($data);
     }
+
+    return $this->sendResponse($savedResults, 'Results saved successfully');
+}
+
 
     /**
      * Display the specified Result.
@@ -105,4 +126,22 @@ class ResultAPIController extends AppBaseController
 
         return $this->sendSuccess('Result deleted successfully');
     }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new ResultsTemplateExport(), 'result_upload_template.xlsx');
+    }
+
+    public function ImportResults(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv|max:2048',
+        ]);
+
+        Excel::import(new ResultsImport, $request->file('file'));
+
+        return response()->json(['message' => 'Results imported successfully'], 200);
+    }
+
+
 }

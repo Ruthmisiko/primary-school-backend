@@ -4,14 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class subject extends Model
+class Setting extends Model
 {
-    public $table = 'subjects';
+    public $table = 'settings';
 
     public $fillable = [
-        'name',
-        'code',
-        'description',
+        'business_name',
+        'business_email',
+        'business_phone'
     ];
 
     protected $casts = [

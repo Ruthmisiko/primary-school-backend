@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Student;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use App\Imports\StudentsImport;
+use Illuminate\Http\JsonResponse;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\StudentTemplateExport;
+use App\Repositories\StudentRepository;
+use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateStudentAPIRequest;
 use App\Http\Requests\API\UpdateStudentAPIRequest;
-use App\Models\Student;
-use App\Imports\StudentsImport;
-use App\Exports\StudentTemplateExport;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Repositories\StudentRepository;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use App\Http\Controllers\AppBaseController;
 
 /**
  * Class StudentAPIController
@@ -67,7 +68,7 @@ class StudentAPIController extends AppBaseController
         if (empty($student)) {
             return $this->sendError('Student not found');
         }
-        $student = Student::with(['sclass', 'results'])->find($id);
+        $student = Student::with(['sclass', 'results', 'results.exam', 'results.subject'])->find($id);
 
         return $this->sendResponse($student->toArray(), 'Student retrieved successfully');
     }
@@ -127,4 +128,11 @@ class StudentAPIController extends AppBaseController
     {
         return Excel::download(new StudentTemplateExport(), 'student_upload_template.xlsx');
     }
+
+    public function printResult($id)
+    {
+        $pdf = PDF::loadView('results.print', ['student' => Student::findOrFail($id)]);
+        return $pdf->download("student-result-{$id}.pdf");
+    }
+
 }
