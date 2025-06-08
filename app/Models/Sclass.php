@@ -24,12 +24,16 @@ class Sclass extends Model
     {
         return $this->hasMany(Result::class, 'class_id', 'id');
     }
+
     public function teacher()
-    {
-        return $this->belongsTo(Teacher::class);
-    }
+{
+    return $this->belongsTo(Teacher::class);
+}
+
     public function students()
 {
-    return $this->hasMany(Student::class);
+    return $this->hasMany(Student::class, 'class_id', 'id');
 }
+
+
 }

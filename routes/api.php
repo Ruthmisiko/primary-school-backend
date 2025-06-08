@@ -77,3 +77,11 @@ Route::get('/download-results-template', [App\Http\Controllers\API\ResultAPICont
 
 Route::resource('settings', App\Http\Controllers\API\SettingAPIController::class)
     ->except(['create', 'edit']);
+
+Route::resource('users', App\Http\Controllers\API\UserAPIController::class);
+
+//reports
+
+Route::get('teachers/report/pdf', [App\Http\Controllers\API\TeacherAPIController::class, 'TeachersReportPdf']);
+
+Route::get('students/report/pdf', [App\Http\Controllers\API\StudentAPIController::class, 'StudentsReportPdf']);

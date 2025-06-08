@@ -15,11 +15,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable,HasUuids;
+    use HasApiTokens, HasFactory, Notifiable;
 
     public $table = 'users';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    // public $incrementing = false;
+    // protected $keyType = 'string';
     protected $primaryKey = 'id';
     /**
      * The attributes that should be hidden for arrays.
@@ -55,15 +55,17 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public static array $rules = [
+
+    ];
+
     public static function boot()
     {
         parent::boot();
 
 
         static::creating(function ($model) {
-            if(!$model->id){
-                $model->{$model->getKeyName()} = (string) Str::uuid();
-            }
+
 
             if (in_array('code',$model->fillable) && empty($model->code))
                 $model->code= str_pad(DB::table($model->table)->count()+1, 4, '0', STR_PAD_LEFT);

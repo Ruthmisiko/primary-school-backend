@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Requests\API\CreatedashboardAPIRequest;
-use App\Http\Requests\API\UpdatedashboardAPIRequest;
-use App\Models\dashboard;
-use App\Repositories\dashboardRepository;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use App\Http\Controllers\AppBaseController;
+use App\Models\User;
+use App\Models\Payment;
 use App\Models\Student;
 use App\Models\Teacher;
-use App\Models\Payment;
+use App\Models\dashboard;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Repositories\dashboardRepository;
+use App\Http\Controllers\AppBaseController;
+use App\Http\Requests\API\CreatedashboardAPIRequest;
+use App\Http\Requests\API\UpdatedashboardAPIRequest;
 
 /**
  * Class dashboardAPIController
@@ -38,6 +39,7 @@ class dashboardAPIController extends AppBaseController
         // );
 
         $totalStudents = Student::count();
+        $totalUsers = User::count();
         $totalTeachers = Teacher::count();
         // $totalAmount = Payment::sum('amount');
 
@@ -45,6 +47,7 @@ class dashboardAPIController extends AppBaseController
             // 'dashboards' => $dashboards->toArray(),
             'total_students' => $totalStudents,
             'total_teachers' => $totalTeachers,
+            'total_users' => $totalUsers,
             // 'total_amount' => $totalAmount,
         ];
 

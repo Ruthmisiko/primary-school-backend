@@ -134,5 +134,13 @@ class StudentAPIController extends AppBaseController
         $pdf = PDF::loadView('results.print', ['student' => Student::findOrFail($id)]);
         return $pdf->download("student-result-{$id}.pdf");
     }
+    public function StudentsReportPdf (): \Illuminate\Http\Response
+    {
 
+        $students = Student::with(['sclass'])->get();
+
+        return Pdf::loadView('reports.students-report', ['students' => $students])
+            ->setPaper('a4', 'landscape')
+            ->download('students-report.pdf');
+    }
 }

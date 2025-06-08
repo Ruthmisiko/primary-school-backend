@@ -14,11 +14,12 @@ class Teacher extends Model
         'contact_number',
         'designation',
         'email',
-        'assigned_class'
+        'assigned_class',
+        'subjects'
     ];
 
     protected $casts = [
-
+        'subjects' => 'array',
     ];
 
     public static array $rules = [

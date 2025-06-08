@@ -9,6 +9,7 @@ use App\Repositories\TeacherRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
  * Class TeacherAPIController
@@ -107,5 +108,15 @@ class TeacherAPIController extends AppBaseController
         $teacher->delete();
 
         return $this->sendSuccess('Teacher deleted successfully');
+    }
+
+    public function TeachersReportPdf (): \Illuminate\Http\Response
+    {
+
+        $teachers = Teacher::with(['sclass'])->get();
+
+        return Pdf::loadView('reports.teachers-report', ['teachers' => $teachers])
+            ->setPaper('a4', 'landscape')
+            ->download('teachers-report.pdf');
     }
 }
