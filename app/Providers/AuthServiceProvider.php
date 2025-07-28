@@ -23,8 +23,14 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
+        // Expiry settings
         Passport::tokensExpireIn(now()->addDays(15));
         Passport::refreshTokensExpireIn(now()->addDays(30));
-    }
 
+        // Load keys from a custom secure path (recommended)
+        Passport::loadKeysFrom(base_path('config/keys'));
+
+        // Register Passport routes
+        Passport::routes();
+    }
 }
