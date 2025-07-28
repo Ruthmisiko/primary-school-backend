@@ -13,6 +13,8 @@ class Student extends Model
         'class_id',
         'parent',
         'age',
+        'fee_balance',
+         'paid_fee'
     ];
 
     protected $casts = [

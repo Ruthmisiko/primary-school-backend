@@ -47,23 +47,22 @@ class StudentsImport implements ToCollection
 
     private function processStudentData($rowIndex, $name, $parent, $class, $age, $fee_balance, $paid_fee)
     {
-
-        $class =Sclass::where('name', $name)->first();
+        $sclass = Sclass::where('name', $class)->first(); // Correct class lookup
 
         $this->currentStudents = Student::updateOrCreate(
             [
                 'name' => $name
             ],
             [
-                'class_id' => $class ? $class->id : null,
+                'class_id' => $sclass ? $sclass->id : null,
                 'parent' => $parent,
                 'age' => $age,
                 'fee_balance' => $fee_balance,
                 'paid_fee' => $paid_fee,
             ]
         );
-
     }
+
 
 
 }

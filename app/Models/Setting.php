@@ -11,7 +11,9 @@ class Setting extends Model
     public $fillable = [
         'business_name',
         'business_email',
-        'business_phone'
+        'business_phone',
+        'user_id',
+        'location'
     ];
 
     protected $casts = [
@@ -21,6 +23,9 @@ class Setting extends Model
     public static array $rules = [
 
     ];
-
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
 }

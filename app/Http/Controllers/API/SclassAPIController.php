@@ -63,7 +63,7 @@ class SclassAPIController extends AppBaseController
         if (empty($sclass)) {
             return $this->sendError('Sclass not found');
         }
-        $sclass = Sclass::with(['students','teacher'])->find($id);
+        $sclass = Sclass::with(['students','students.results','students.results.exam','teacher'])->find($id);
 
         return $this->sendResponse($sclass->toArray(), 'Sclass retrieved successfully');
     }

@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\Auth\AuthController;
 use App\Http\Controllers\API\Auth\AccessTokenController;
+use App\Http\Controllers\API\SettingAPIController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -75,8 +77,8 @@ Route::post('/import-results', [App\Http\Controllers\API\ResultAPIController::cl
 Route::get('/download-results-template', [App\Http\Controllers\API\ResultAPIController::class, 'downloadTemplate']);
 
 
-Route::resource('settings', App\Http\Controllers\API\SettingAPIController::class)
-    ->except(['create', 'edit']);
+Route::get('/settings', [SettingAPIController::class, 'index']);
+Route::patch('/settings', [SettingAPIController::class, 'store']);
 
 Route::resource('users', App\Http\Controllers\API\UserAPIController::class);
 

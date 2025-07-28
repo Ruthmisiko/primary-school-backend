@@ -110,7 +110,7 @@ class ResultsImport implements ToCollection
                 'student_id' => $student->id
             ],
             [
-                'marks' => $marks,
+                'marks_obtained' => $marks,
                 'remarks' => $remarks,
                 // Add other fields as needed
             ]

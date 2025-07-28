@@ -10,7 +10,8 @@ class Sclass extends Model
 
     public $fillable = [
         'name',
-        'teacher_id'
+        'teacher_id',
+        'fee'
     ];
 
     protected $casts = [
