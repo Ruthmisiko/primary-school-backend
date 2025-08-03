@@ -57,16 +57,21 @@ class SclassAPIController extends AppBaseController
      */
     public function show($id): JsonResponse
     {
-        /** @var Sclass $sclass */
-        $sclass = $this->sclassRepository->find($id);
+        /** @var Sclass|null $sclass */
+        $sclass = Sclass::with([
+            'students',
+            'students.results',
+            'students.results.exam',
+            'teacher'
+        ])->find($id);
 
-        if (empty($sclass)) {
+        if (is_null($sclass)) {
             return $this->sendError('Sclass not found');
         }
-        $sclass = Sclass::with(['students','students.results','students.results.exam','teacher'])->find($id);
 
         return $this->sendResponse($sclass->toArray(), 'Sclass retrieved successfully');
     }
+
 
     /**
      * Update the specified Sclass in storage.
