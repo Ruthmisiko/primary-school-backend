@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\SchoolScope;
 use Illuminate\Database\Eloquent\Model;
 
 class Result extends Model
@@ -16,6 +17,7 @@ class Result extends Model
         'marks_obtained',
         'grade',
         'remarks',
+        'school_id',
     ];
 
 
@@ -47,6 +49,14 @@ class Result extends Model
     {
         return $this->belongsTo(subject::class, 'subject_id');
     }
+    public function school()
+    {
+        return $this->belongsTo(School::class, 'school_id', 'id');
+    }
 
+    protected static function booted()
+{
+    static::addGlobalScope(new SchoolScope);
+}
 
 }

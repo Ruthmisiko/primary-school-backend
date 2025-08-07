@@ -37,6 +37,9 @@ class SettingAPIController extends Controller
             'location' => 'nullable|string|max:255',
         ]);
 
+        $validated['school_id'] = auth()->user()->school_id;
+
+
         $setting = Setting::where('user_id', auth()->id())->first();
 
         if ($setting) {

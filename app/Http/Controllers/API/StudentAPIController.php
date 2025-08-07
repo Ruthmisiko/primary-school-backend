@@ -38,7 +38,7 @@ class StudentAPIController extends AppBaseController
             $request->get('limit')
         );
 
-        $students = Student::with(['sclass', 'results'])->get();
+        $students = Student::with(['sclass', 'results','school'])->get();
 
         return $this->sendResponse($students->toArray(), 'Students retrieved successfully');
     }
@@ -50,6 +50,8 @@ class StudentAPIController extends AppBaseController
     public function store(CreateStudentAPIRequest $request): JsonResponse
     {
         $input = $request->all();
+
+        $input['school_id'] = auth()->user()->school_id;
 
         $student = $this->studentRepository->create($input);
 
@@ -68,7 +70,7 @@ class StudentAPIController extends AppBaseController
         if (empty($student)) {
             return $this->sendError('Student not found');
         }
-        $student = Student::with(['sclass', 'results', 'results.exam', 'results.subject'])->find($id);
+        $student = Student::with(['sclass', 'results', 'results.exam', 'results.subject','school'])->find($id);
 
         return $this->sendResponse($student->toArray(), 'Student retrieved successfully');
     }
@@ -80,6 +82,9 @@ class StudentAPIController extends AppBaseController
     public function update($id, UpdateStudentAPIRequest $request): JsonResponse
     {
         $input = $request->all();
+
+        $input['school_id'] = auth()->user()->school_id;
+
 
         /** @var Student $student */
         $student = $this->studentRepository->find($id);

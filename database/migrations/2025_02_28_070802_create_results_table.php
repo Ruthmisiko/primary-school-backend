@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('marks_obtained');
             $table->string('grade')->nullable();
             $table->text('remarks')->nullable();
+            $table->unsignedBigInteger('school_id')->index();
             $table->timestamps();
         });
     }

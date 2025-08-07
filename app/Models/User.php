@@ -3,16 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Support\Str;
+use App\Models\Scopes\SchoolScope;
+use Illuminate\Support\Facades\DB;
+use Laravel\Passport\HasApiTokens;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
-use Laravel\Passport\HasApiTokens;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -47,6 +49,7 @@ class User extends Authenticatable
         'registration_number',
         'status_id',
         'password',
+        'school_id'
     ];
 
 
@@ -139,6 +142,53 @@ class User extends Authenticatable
         return $this->hasOne(Wallet::class, 'user_id');
     }
 
+    public function school()
+    {
+        return $this->belongsTo(School::class, 'school_id', 'id');
+    }
 
+    /**
+     * Check if user is a super admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->userType === 'super_admin';
+    }
 
+    /**
+     * Check if user is an admin (including super admin)
+     */
+    public function isAdmin(): bool
+    {
+        return in_array($this->userType, ['super_admin', 'admin']);
+    }
+
+    /**
+     * Check if user is a client
+     */
+    public function isClient(): bool
+    {
+        return $this->userType === 'client';
+    }
+
+    /**
+     * Check if user has access to admin functions
+     */
+    public function hasAdminAccess(): bool
+    {
+        return $this->isSuperAdmin();
+    }
+
+    /**
+     * Check if user has access to school management
+     */
+    public function hasSchoolManagementAccess(): bool
+    {
+        return $this->isAdmin();
+    }
+
+    protected static function booted()
+{
+    static::addGlobalScope(new SchoolScope);
+}
 }

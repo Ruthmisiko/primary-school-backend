@@ -45,6 +45,9 @@ class subjectAPIController extends AppBaseController
     {
         $input = $request->all();
 
+        $input['school_id'] = auth()->user()->school_id;
+
+
         $subject = $this->subjectRepository->create($input);
 
         return $this->sendResponse($subject->toArray(), 'Subject saved successfully');
@@ -73,6 +76,9 @@ class subjectAPIController extends AppBaseController
     public function update($id, UpdatesubjectAPIRequest $request): JsonResponse
     {
         $input = $request->all();
+
+        $input['school_id'] = auth()->user()->school_id;
+
 
         /** @var subject $subject */
         $subject = $this->subjectRepository->find($id);

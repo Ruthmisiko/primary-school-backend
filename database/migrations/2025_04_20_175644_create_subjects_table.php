@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->text('description')->nullable();
             $table->timestamps();
+            $table->unsignedBigInteger('school_id')->index();
         });
     }
 

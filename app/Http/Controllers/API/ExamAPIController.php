@@ -47,6 +47,9 @@ class ExamAPIController extends AppBaseController
     {
         $input = $request->all();
 
+        $input['school_id'] = auth()->user()->school_id;
+
+
         $exam = $this->examRepository->create($input);
 
         return $this->sendResponse($exam->toArray(), 'Exam saved successfully');
@@ -75,6 +78,9 @@ class ExamAPIController extends AppBaseController
     public function update($id, UpdateExamAPIRequest $request): JsonResponse
     {
         $input = $request->all();
+
+        $input['school_id'] = auth()->user()->school_id;
+
 
         /** @var Exam $exam */
         $exam = $this->examRepository->find($id);

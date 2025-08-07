@@ -36,7 +36,6 @@ class TeacherAPIController extends AppBaseController
         );
         $teachers = Teacher::with(['sclass'])->get();
 
-        $teachers = Teacher::with(['sclass'])->get();
         return $this->sendResponse($teachers->toArray(), 'Teachers retrieved successfully');
     }
 
@@ -48,10 +47,13 @@ class TeacherAPIController extends AppBaseController
     {
         $input = $request->all();
 
+        $input['school_id'] = auth()->user()->school_id;
+
         $teacher = $this->teacherRepository->create($input);
 
         return $this->sendResponse($teacher->toArray(), 'Teacher saved successfully');
     }
+
 
     /**
      * Display the specified Teacher.
@@ -77,6 +79,9 @@ class TeacherAPIController extends AppBaseController
     public function update($id, UpdateTeacherAPIRequest $request): JsonResponse
     {
         $input = $request->all();
+
+        $input['school_id'] = auth()->user()->school_id;
+
 
         /** @var Teacher $teacher */
         $teacher = $this->teacherRepository->find($id);

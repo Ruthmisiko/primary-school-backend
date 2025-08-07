@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('business_email');
             $table->string('business_phone');
             $table->string('location')->nullable();
+            $table->unsignedBigInteger('school_id')->index();
             $table->timestamps();
         });
     }

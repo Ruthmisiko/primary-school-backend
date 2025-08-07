@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->text('subjects_taught')->nullable();
             $table->string('assigned_class')->nullable();
+            $table->unsignedBigInteger('school_id')->index();
             $table->timestamps();
         });
     }

@@ -52,6 +52,9 @@ class ResultAPIController extends AppBaseController
     public function store(CreateResultAPIRequest $request): JsonResponse
 {
     $input = $request->only(['class_id', 'subject_id', 'exam_id']);
+
+    $input['school_id'] = auth()->user()->school_id;
+
     $items = $request->input('result_items', []);
 
     $savedResults = [];
@@ -94,6 +97,9 @@ class ResultAPIController extends AppBaseController
     public function update($id, UpdateResultAPIRequest $request): JsonResponse
     {
         $input = $request->all();
+
+        $input['school_id'] = auth()->user()->school_id;
+
 
         /** @var Result $result */
         $result = $this->resultRepository->find($id);

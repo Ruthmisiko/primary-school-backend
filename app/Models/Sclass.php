@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\SchoolScope;
 use Illuminate\Database\Eloquent\Model;
 
 class Sclass extends Model
@@ -11,7 +12,8 @@ class Sclass extends Model
     public $fillable = [
         'name',
         'teacher_id',
-        'fee'
+        'fee',
+        'school_id'
     ];
 
     protected $casts = [
@@ -35,6 +37,14 @@ class Sclass extends Model
 {
     return $this->hasMany(Student::class, 'class_id', 'id');
 }
+public function school()
+{
+    return $this->belongsTo(School::class, 'school_id', 'id');
+}
 
+protected static function booted()
+{
+    static::addGlobalScope(new SchoolScope);
+}
 
 }

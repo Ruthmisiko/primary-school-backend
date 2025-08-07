@@ -19,7 +19,10 @@ class UserAPIController extends AppBaseController
 
     public function __construct(UserRepository $userRepo)
     {
+
         $this->userRepository = $userRepo;
+
+        $this->middleware('auth:api');
     }
 
     /**
@@ -44,6 +47,9 @@ class UserAPIController extends AppBaseController
     public function store(CreateUserAPIRequest $request): JsonResponse
     {
         $input = $request->all();
+
+
+        $input['school_id'] = $request->input('school_id');
 
         $user = $this->userRepository->create($input);
 
@@ -80,6 +86,8 @@ class UserAPIController extends AppBaseController
         if (empty($user)) {
             return $this->sendError('User not found');
         }
+
+        $input['school_id'] = auth()->user()->school_id;
 
         $user = $this->userRepository->update($input, $id);
 

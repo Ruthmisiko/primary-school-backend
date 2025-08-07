@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('cocurriculars', function (Blueprint $table) {
             $table->id('id');
             $table->timestamps();
+            $table->unsignedBigInteger('school_id')->index();
         });
     }
 

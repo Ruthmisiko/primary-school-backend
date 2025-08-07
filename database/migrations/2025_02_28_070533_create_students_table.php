@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('age');
             $table->float('fee_balance')->nullable();
             $table->string('paid_fee')->nullable();
+            $table->unsignedBigInteger('school_id')->index();
             $table->timestamps();
         });
     }

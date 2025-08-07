@@ -46,6 +46,9 @@ class SclassAPIController extends AppBaseController
     {
         $input = $request->all();
 
+        $input['school_id'] = auth()->user()->school_id;
+
+
         $sclass = $this->sclassRepository->create($input);
 
         return $this->sendResponse($sclass->toArray(), 'Sclass saved successfully');
@@ -80,6 +83,9 @@ class SclassAPIController extends AppBaseController
     public function update($id, UpdateSclassAPIRequest $request): JsonResponse
     {
         $input = $request->all();
+
+        $input['school_id'] = auth()->user()->school_id;
+
 
         /** @var Sclass $sclass */
         $sclass = $this->sclassRepository->find($id);

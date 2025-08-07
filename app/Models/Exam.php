@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\SchoolScope;
 use Illuminate\Database\Eloquent\Model;
 
 class Exam extends Model
@@ -12,7 +13,8 @@ class Exam extends Model
         'year',
         'name',
         'term',
-        'class_id'
+        'class_id',
+        'school_id'
     ];
 
     protected $casts = [
@@ -27,5 +29,13 @@ class Exam extends Model
     {
         return $this->belongsTo(Sclass::class, 'class_id', 'id');
     }
+    public function school()
+    {
+        return $this->belongsTo(School::class, 'school_id', 'id');
+    }
 
+    protected static function booted()
+{
+    static::addGlobalScope(new SchoolScope);
+}
 }

@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('role')->nullable();
             $table->string('status_id')->nullable();
+            $table->unsignedBigInteger('school_id')->index()->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

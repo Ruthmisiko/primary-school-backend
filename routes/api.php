@@ -26,9 +26,10 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 
 Route::post('/logout', [AuthController::class, 'logout']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::middleware('auth:api')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
 
 
 Route::resource('students', App\Http\Controllers\API\StudentAPIController::class)
@@ -82,8 +83,25 @@ Route::patch('/settings', [SettingAPIController::class, 'store']);
 
 Route::resource('users', App\Http\Controllers\API\UserAPIController::class);
 
+// School management routes - Only super_admin and admin can access
+Route::resource('schools', App\Http\Controllers\API\SchoolAPIController::class)
+    ->middleware('userType:super_admin,admin');
+
+// Admin routes - Only super_admin can access
+Route::prefix('admin')->middleware('userType:super_admin')->group(function () {
+    Route::get('/users', [App\Http\Controllers\API\AdminAPIController::class, 'getUsers']);
+    Route::get('/schools', [App\Http\Controllers\API\AdminAPIController::class, 'getSchools']);
+    Route::post('/assign-school', [App\Http\Controllers\API\AdminAPIController::class, 'assignSchool']);
+    Route::post('/create-user', [App\Http\Controllers\API\AdminAPIController::class, 'createUser']);
+    Route::patch('/update-user/{id}', [App\Http\Controllers\API\AdminAPIController::class, 'updateUser']);
+    Route::delete('/remove-school/{user_id}', [App\Http\Controllers\API\AdminAPIController::class, 'removeSchoolAssignment']);
+    Route::get('/statistics', [App\Http\Controllers\API\AdminAPIController::class, 'getStatistics']);
+});
+
 //reports
 
 Route::get('teachers/report/pdf', [App\Http\Controllers\API\TeacherAPIController::class, 'TeachersReportPdf']);
 
 Route::get('students/report/pdf', [App\Http\Controllers\API\StudentAPIController::class, 'StudentsReportPdf']);
+
+});
