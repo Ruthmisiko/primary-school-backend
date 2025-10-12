@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Flash;
+use Illuminate\Http\Request;
+use App\Models\StudentParent;
+use App\Repositories\ParentRepository;
 use App\Http\Requests\CreateParentRequest;
 use App\Http\Requests\UpdateParentRequest;
 use App\Http\Controllers\AppBaseController;
-use App\Repositories\ParentRepository;
-use Illuminate\Http\Request;
-use Flash;
 
 class ParentController extends AppBaseController
 {
@@ -24,10 +25,13 @@ class ParentController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $parents = $this->parentRepository->paginate(10);
+        $parents = StudentParent::with('student')->get();
 
-        return view('parents.index')
-            ->with('parents', $parents);
+        return response()->json([
+            'success' => true,
+            'data' => $parents,
+            'message' => 'Parents retrieved successfully'
+        ]);
     }
 
     /**

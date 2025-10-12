@@ -13,6 +13,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+use App\Services\TwilioService;
+
+Route::get('/test-sms', function () {
+    $twilio = new TwilioService();
+    $twilio->sendSms('+254713631923', 'Hello Ruth! 👋 This is a test SMS from your Laravel + Twilio integration.');
+    return '✅ SMS sent — check your phone and Twilio logs.';
+});
+
 Route::get('/', function () {
     return view('welcome');
 });

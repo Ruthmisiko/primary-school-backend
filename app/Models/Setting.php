@@ -15,7 +15,8 @@ class Setting extends Model
         'business_phone',
         'user_id',
         'location',
-        'school_id'
+        'school_id',
+        'school_logo'
     ];
 
     protected $casts = [

@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Student;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Imports\StudentsImport;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
+use App\Models\StudentParent;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\StudentTemplateExport;
 use App\Repositories\StudentRepository;
@@ -32,13 +33,25 @@ class StudentAPIController extends AppBaseController
      */
     public function index(Request $request): JsonResponse
     {
-        $students = $this->studentRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+        $query = Student::with(['sclass', 'results', 'school']);
 
-        $students = Student::with(['sclass', 'results','school'])->get();
+        // Apply filters
+        if ($request->has('class_id') && $request->class_id) {
+            $query->where('class_id', $request->class_id);
+        }
+
+        // Search by name
+        if ($request->has('search') && $request->search) {
+            $searchTerm = $request->search;
+            $query->where('name', 'like', "%{$searchTerm}%");
+        }
+
+        // Order by
+        $orderBy = $request->get('orderBy', 'created_at');
+        $sortedBy = $request->get('sortedBy', 'desc');
+        $query->orderBy($orderBy, $sortedBy);
+
+        $students = $query->get();
 
         return $this->sendResponse($students->toArray(), 'Students retrieved successfully');
     }
@@ -54,6 +67,16 @@ class StudentAPIController extends AppBaseController
         $input['school_id'] = auth()->user()->school_id;
 
         $student = $this->studentRepository->create($input);
+
+        if ($request->has('parent') && $request->has('phone_number')) {
+            StudentParent::create([
+                'name'        => $request->input('parent'),
+                'phone_number'=> $request->input('phone_number'),
+                'address'=> $request->input('address'),
+                'student_id'  => $student->id,
+                'school_id'   => $input['school_id'],
+            ]);
+        }
 
         return $this->sendResponse($student->toArray(), 'Student saved successfully');
     }

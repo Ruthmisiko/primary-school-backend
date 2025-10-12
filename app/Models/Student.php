@@ -47,4 +47,13 @@ class Student extends Model
     {
         static::addGlobalScope(new SchoolScope);
     }
+
+    public function parents()
+    {
+        return $this->hasMany(StudentParent::class, 'student_id');
+    }
+
+
 }
+
+

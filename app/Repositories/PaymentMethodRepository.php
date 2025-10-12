@@ -2,13 +2,13 @@
 
 namespace App\Repositories;
 
-use App\Models\StudentParent;
+use App\Models\PaymentMethod;
 use App\Repositories\BaseRepository;
 
-class ParentRepository extends BaseRepository
+class PaymentMethodRepository extends BaseRepository
 {
     protected $fieldSearchable = [
-
+        
     ];
 
     public function getFieldsSearchable(): array
@@ -18,6 +18,6 @@ class ParentRepository extends BaseRepository
 
     public function model(): string
     {
-        return StudentParent::class;
+        return PaymentMethod::class;
     }
 }

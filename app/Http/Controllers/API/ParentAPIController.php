@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Requests\API\CreateParentAPIRequest;
 use App\Http\Requests\API\UpdateParentAPIRequest;
-use App\Models\Parent;
+use App\Models\StudentParent;
 use App\Repositories\ParentRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,11 +28,13 @@ class ParentAPIController extends AppBaseController
      */
     public function index(Request $request): JsonResponse
     {
-        $parents = $this->parentRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+        // Load parents with student relationship (bypass global scopes)
+        $parents = StudentParent::with(['student' => function($query) {
+            $query->withoutGlobalScope(\App\Models\Scopes\SchoolScope::class)
+                ->with(['sclass' => function($subQuery) {
+                    $subQuery->withoutGlobalScope(\App\Models\Scopes\SchoolScope::class);
+                }]);
+        }])->get();
 
         return $this->sendResponse($parents->toArray(), 'Parents retrieved successfully');
     }
@@ -70,18 +72,29 @@ class ParentAPIController extends AppBaseController
      * Update the specified Parent in storage.
      * PUT/PATCH /parents/{id}
      */
-    public function update($id, UpdateParentAPIRequest $request): JsonResponse
+    public function update($id, Request $request): JsonResponse
     {
-        $input = $request->all();
+        // Validate input
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'student_id' => 'required|exists:students,id',
+            'phone_number' => 'required|string|max:20',
+            'id_number' => 'nullable|string|max:50',
+            'gender' => 'nullable|in:male,female,other',
+            'address' => 'nullable|string|max:255',
+        ]);
 
-        /** @var Parent $parent */
-        $parent = $this->parentRepository->find($id);
+        $parent = StudentParent::find($id);
 
         if (empty($parent)) {
             return $this->sendError('Parent not found');
         }
 
-        $parent = $this->parentRepository->update($input, $id);
+        $validated['school_id'] = auth()->user()->school_id;
+        $parent->update($validated);
+
+        // Reload with relationships
+        $parent = StudentParent::with(['student.sclass'])->find($id);
 
         return $this->sendResponse($parent->toArray(), 'Parent updated successfully');
     }

@@ -31,59 +31,48 @@ Route::middleware('auth:api')->group(function () {
         return $request->user();
     });
 
+Route::resource('students', App\Http\Controllers\API\StudentAPIController::class);
 
-Route::resource('students', App\Http\Controllers\API\StudentAPIController::class)
-    ->except(['create', 'edit']);
+Route::resource('parents', App\Http\Controllers\API\ParentAPIController::class);
 
-Route::resource('teachers', App\Http\Controllers\API\TeacherAPIController::class)
-    ->except(['create', 'edit']);
+Route::resource('teachers', App\Http\Controllers\API\TeacherAPIController::class);
 
-Route::resource('sclasses', App\Http\Controllers\API\SclassAPIController::class)
-    ->except(['create', 'edit']);
+Route::resource('sclasses', App\Http\Controllers\API\SclassAPIController::class);
 
-Route::resource('parents', App\Http\Controllers\API\ParentAPIController::class)
-    ->except(['create', 'edit']);
+Route::resource('parents', App\Http\Controllers\API\ParentAPIController::class);
 
-Route::resource('cocurriculars', App\Http\Controllers\API\CocurricularAPIController::class)
-    ->except(['create', 'edit']);
+Route::resource('cocurriculars', App\Http\Controllers\API\CocurricularAPIController::class);
 
-Route::resource('exams', App\Http\Controllers\API\ExamAPIController::class)
-    ->except(['create', 'edit']);
+Route::resource('exams', App\Http\Controllers\API\ExamAPIController::class);
 
-Route::resource('exams', App\Http\Controllers\API\ExamAPIController::class)
-    ->except(['create', 'edit']);
+Route::resource('exams', App\Http\Controllers\API\ExamAPIController::class);
 
 Route::resource('results', App\Http\Controllers\API\ResultAPIController::class);
 
 Route::get('students/{id}/print-result', [App\Http\Controllers\API\StudentAPIController::class, 'printResult']);
 
-Route::resource('subjects', App\Http\Controllers\API\subjectAPIController::class)
-    ->except(['create', 'edit']);
+Route::resource('subjects', App\Http\Controllers\API\subjectAPIController::class);
 
-Route::resource('dashboards', App\Http\Controllers\API\dashboardAPIController::class)
-    ->except(['create', 'edit']);
+Route::resource('dashboards', App\Http\Controllers\API\dashboardAPIController::class);
+Route::get('dashboard/enrollment-stats', [App\Http\Controllers\API\dashboardAPIController::class, 'getEnrollmentStats']);
 
-Route::resource('payments', App\Http\Controllers\API\PaymentAPIController::class)
-    ->except(['create', 'edit']);
-
+Route::resource('payments', App\Http\Controllers\API\PaymentAPIController::class);
 //students import and export
 Route::post('/import-students', [App\Http\Controllers\API\StudentAPIController::class, 'importStudents']);
 
 Route::get('/download-students-template', [App\Http\Controllers\API\StudentAPIController::class, 'downloadTemplate']);
 
-// results import and export
-
 Route::post('/import-results', [App\Http\Controllers\API\ResultAPIController::class, 'importResults']);
 
 Route::get('/download-results-template', [App\Http\Controllers\API\ResultAPIController::class, 'downloadTemplate']);
 
-
 Route::get('/settings', [SettingAPIController::class, 'index']);
 Route::patch('/settings', [SettingAPIController::class, 'store']);
+Route::post('/settings', [SettingAPIController::class, 'store']);
+Route::get('/settings/logo', [SettingAPIController::class, 'getLogo']);
 
 Route::resource('users', App\Http\Controllers\API\UserAPIController::class);
 
-// School management routes - Only super_admin and admin can access
 Route::resource('schools', App\Http\Controllers\API\SchoolAPIController::class)
     ->middleware('userType:super_admin,admin');
 
@@ -104,4 +93,9 @@ Route::get('teachers/report/pdf', [App\Http\Controllers\API\TeacherAPIController
 
 Route::get('students/report/pdf', [App\Http\Controllers\API\StudentAPIController::class, 'StudentsReportPdf']);
 
+Route::post('/payments/initiate', [App\Http\Controllers\API\PaymentAPIController::class, 'initiatePayment']);
+
+Route::post('/pesapal/callback', [App\Http\Controllers\API\PaymentAPIController::class, 'handleCallback']);
 });
+
+Route::resource('payment-methods', App\Http\Controllers\API\PaymentMethodAPIController::class);

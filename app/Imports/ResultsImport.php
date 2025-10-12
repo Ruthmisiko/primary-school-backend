@@ -112,9 +112,11 @@ class ResultsImport implements ToCollection
             [
                 'marks_obtained' => $marks,
                 'remarks' => $remarks,
-                // Add other fields as needed
+                'school_id' => auth()->user()->school_id,
             ]
         );
+        
+        Log::info("Result saved for student: {$studentName}, marks: {$marks}");
     }
 
     public function getProcessedCount(): int

@@ -37,6 +37,7 @@ class UserAPIController extends AppBaseController
             $request->get('limit')
         );
 
+        $users = User::with(['school'])->get();
         return $this->sendResponse($users->toArray(), 'Users retrieved successfully');
     }
 

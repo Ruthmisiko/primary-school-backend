@@ -13,13 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('exams', function (Blueprint $table) {
+        Schema::create('payment_methods', function (Blueprint $table) {
             $table->id('id');
-            $table->integer('year');
-            $table->string('term');
             $table->string('name');
-            $table->string('class_id');
-            $table->unsignedBigInteger('school_id')->index();
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }
@@ -31,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::drop('exams');
+        Schema::drop('payment_methods');
     }
 };

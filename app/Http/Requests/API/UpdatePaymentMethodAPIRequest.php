@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\API;
 
-use App\Models\StudentParent;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Models\PaymentMethod;
+use InfyOm\Generator\Request\APIRequest;
 
-class CreateParentRequest extends FormRequest
+class UpdatePaymentMethodAPIRequest extends APIRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,6 +24,8 @@ class CreateParentRequest extends FormRequest
      */
     public function rules()
     {
-        return StudentParent::$rules;
+        $rules = PaymentMethod::$rules;
+        
+        return $rules;
     }
 }

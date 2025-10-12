@@ -122,4 +122,46 @@ class dashboardAPIController extends AppBaseController
 
         return $this->sendSuccess('Dashboard deleted successfully');
     }
+
+    /**
+     * Get monthly enrollment statistics
+     * GET /dashboards/enrollment-stats
+     */
+    public function getEnrollmentStats(Request $request): JsonResponse
+    {
+        $year = $request->get('year', date('Y'));
+        
+        // Get monthly enrollment data
+        $monthlyEnrollments = [];
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        for ($month = 1; $month <= 12; $month++) {
+            $count = Student::whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->count();
+            
+            $monthlyEnrollments[] = [
+                'month' => $months[$month - 1],
+                'count' => $count,
+                'month_number' => $month
+            ];
+        }
+
+        // Get total for the year
+        $totalForYear = Student::whereYear('created_at', $year)->count();
+        
+        // Get comparison with previous year
+        $previousYearTotal = Student::whereYear('created_at', $year - 1)->count();
+        $percentageChange = $previousYearTotal > 0 
+            ? round((($totalForYear - $previousYearTotal) / $previousYearTotal) * 100, 2) 
+            : 0;
+
+        return $this->sendResponse([
+            'monthly_data' => $monthlyEnrollments,
+            'total_for_year' => $totalForYear,
+            'previous_year_total' => $previousYearTotal,
+            'percentage_change' => $percentageChange,
+            'year' => $year
+        ], 'Enrollment statistics retrieved successfully');
+    }
 }

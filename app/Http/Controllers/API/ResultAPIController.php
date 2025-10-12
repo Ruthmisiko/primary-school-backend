@@ -34,12 +34,39 @@ class ResultAPIController extends AppBaseController
      */
     public function index(Request $request): JsonResponse
     {
-        $results = $this->resultRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
-        $results = Result::with(['sclass', 'exam','student','subject'])->get();
+        $query = Result::with(['sclass', 'exam', 'student', 'subject']);
+
+        // Apply filters
+        if ($request->has('class_id') && $request->class_id) {
+            $query->where('class_id', $request->class_id);
+        }
+
+        if ($request->has('subject_id') && $request->subject_id) {
+            $query->where('subject_id', $request->subject_id);
+        }
+
+        if ($request->has('exam_id') && $request->exam_id) {
+            $query->where('exam_id', $request->exam_id);
+        }
+
+        if ($request->has('student_id') && $request->student_id) {
+            $query->where('student_id', $request->student_id);
+        }
+
+        // Search functionality
+        if ($request->has('search') && $request->search) {
+            $searchTerm = $request->search;
+            $query->whereHas('student', function($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Order by
+        $orderBy = $request->get('orderBy', 'created_at');
+        $sortedBy = $request->get('sortedBy', 'desc');
+        $query->orderBy($orderBy, $sortedBy);
+
+        $results = $query->get();
 
         return $this->sendResponse($results->toArray(), 'Results retrieved successfully');
     }
@@ -144,9 +171,29 @@ class ResultAPIController extends AppBaseController
             'file' => 'required|file|mimes:xlsx,csv|max:2048',
         ]);
 
-        Excel::import(new ResultsImport, $request->file('file'));
+        try {
+            $import = new ResultsImport();
+            Excel::import($import, $request->file('file'));
 
-        return response()->json(['message' => 'Results imported successfully'], 200);
+            $processedCount = $import->getProcessedCount();
+            $errorCount = $import->getErrorCount();
+
+            \Log::info("Results import completed. Processed: {$processedCount}, Errors: {$errorCount}");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Results imported successfully',
+                'processed' => $processedCount,
+                'errors' => $errorCount,
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error("Results import failed: " . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Import failed: ' . $e->getMessage()
+            ], 422);
+        }
     }
 
 
