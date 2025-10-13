@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\Models\Supplier;
+use App\Models\Expense;
 use App\Models\dashboard;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -41,6 +43,8 @@ class dashboardAPIController extends AppBaseController
         $totalStudents = Student::count();
         $totalUsers = User::count();
         $totalTeachers = Teacher::count();
+        $totalSuppliers = Supplier::count();
+        $totalExpenses = Expense::sum('amount');
         // $totalAmount = Payment::sum('amount');
 
         $responseData = [
@@ -48,6 +52,8 @@ class dashboardAPIController extends AppBaseController
             'total_students' => $totalStudents,
             'total_teachers' => $totalTeachers,
             'total_users' => $totalUsers,
+            'total_suppliers' => $totalSuppliers,
+            'total_expenses' => $totalExpenses,
             // 'total_amount' => $totalAmount,
         ];
 
@@ -163,5 +169,39 @@ class dashboardAPIController extends AppBaseController
             'percentage_change' => $percentageChange,
             'year' => $year
         ], 'Enrollment statistics retrieved successfully');
+    }
+
+    /**
+     * Get monthly expense statistics
+     * GET /dashboards/expense-stats
+     */
+    public function getExpenseStats(Request $request): JsonResponse
+    {
+        $year = $request->get('year', date('Y'));
+        
+        // Get monthly expense data
+        $monthlyExpenses = [];
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        for ($month = 1; $month <= 12; $month++) {
+            $total = Expense::whereYear('expense_date', $year)
+                ->whereMonth('expense_date', $month)
+                ->sum('amount');
+            
+            $monthlyExpenses[] = [
+                'month' => $months[$month - 1],
+                'amount' => (float) $total,
+                'month_number' => $month
+            ];
+        }
+
+        // Get total for the year
+        $totalForYear = Expense::whereYear('expense_date', $year)->sum('amount');
+
+        return $this->sendResponse([
+            'monthly_data' => $monthlyExpenses,
+            'total_for_year' => $totalForYear,
+            'year' => $year
+        ], 'Expense statistics retrieved successfully');
     }
 }
