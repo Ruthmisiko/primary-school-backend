@@ -96,6 +96,6 @@ Route::get('students/report/pdf', [App\Http\Controllers\API\StudentAPIController
 Route::post('/payments/initiate', [App\Http\Controllers\API\PaymentAPIController::class, 'initiatePayment']);
 
 Route::post('/pesapal/callback', [App\Http\Controllers\API\PaymentAPIController::class, 'handleCallback']);
-});
 
 Route::resource('payment-methods', App\Http\Controllers\API\PaymentMethodAPIController::class);
+});

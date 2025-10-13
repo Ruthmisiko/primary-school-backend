@@ -45,7 +45,19 @@ class PaymentMethodAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        $input['school_id'] = auth()->user()->school_id;
+        // Check if user is authenticated
+        if (!auth()->check()) {
+            return $this->sendError('Unauthenticated', 401);
+        }
+
+        $user = auth()->user();
+        
+        // Check if user has school_id
+        if (!$user->school_id) {
+            return $this->sendError('User is not assigned to any school', 403);
+        }
+
+        $input['school_id'] = $user->school_id;
 
         $paymentMethod = $this->paymentMethodRepository->create($input);
 
