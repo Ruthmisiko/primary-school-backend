@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Student;
+use App\Models\School;
+use App\Models\Scopes\SchoolScope;
 use Illuminate\Database\Eloquent\Model;
 
 class StudentParent extends Model
@@ -32,8 +34,13 @@ class StudentParent extends Model
         return $this->belongsTo(Student::class, 'student_id', 'id');
     }
 
+    public function school()
+    {
+        return $this->belongsTo(School::class, 'school_id', 'id');
+    }
 
-
-
-
+    protected static function booted()
+    {
+        static::addGlobalScope(new SchoolScope);
+    }
 }

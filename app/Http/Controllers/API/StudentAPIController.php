@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Imports\StudentsImport;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -69,13 +70,33 @@ class StudentAPIController extends AppBaseController
         $student = $this->studentRepository->create($input);
 
         if ($request->has('parent') && $request->has('phone_number')) {
-            StudentParent::create([
+            // Create parent record
+            $parent = StudentParent::create([
                 'name'        => $request->input('parent'),
                 'phone_number'=> $request->input('phone_number'),
                 'address'=> $request->input('address'),
                 'student_id'  => $student->id,
                 'school_id'   => $input['school_id'],
             ]);
+
+            // Create parent user account
+            $parentEmail = strtolower(str_replace(' ', '', $request->input('parent'))) . '@gmail.com';
+            $parentPassword = $request->input('phone_number'); // Use phone number as password
+            
+            // Check if parent user already exists
+            $existingParentUser = User::where('email', $parentEmail)->first();
+            
+            if (!$existingParentUser) {
+                User::create([
+                    'name' => $request->input('parent'),
+                    'username' => $request->input('parent'), // Set username to parent name
+                    'email' => $parentEmail,
+                    'password' => bcrypt($parentPassword),
+                    'userType' => 'parent',
+                    'phone_number' => $request->input('phone_number'),
+                    'school_id' => $input['school_id'],
+                ]);
+            }
         }
 
         return $this->sendResponse($student->toArray(), 'Student saved successfully');

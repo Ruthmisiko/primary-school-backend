@@ -172,6 +172,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is a parent
+     */
+    public function isParent(): bool
+    {
+        return $this->userType === 'parent';
+    }
+
+    /**
      * Check if user has access to admin functions
      */
     public function hasAdminAccess(): bool

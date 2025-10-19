@@ -39,8 +39,6 @@ Route::middleware('auth:api')->group(function () {
 
     Route::resource('sclasses', App\Http\Controllers\API\SclassAPIController::class);
 
-    Route::resource('parents', App\Http\Controllers\API\ParentAPIController::class);
-
     Route::resource('cocurriculars', App\Http\Controllers\API\CocurricularAPIController::class);
 
     Route::resource('exams', App\Http\Controllers\API\ExamAPIController::class);
@@ -82,6 +80,8 @@ Route::middleware('auth:api')->group(function () {
 
     Route::resource('suppliers', App\Http\Controllers\API\SupplierAPIController::class);
 
+    Route::resource('events', App\Http\Controllers\API\EventAPIController::class);
+
     Route::resource('schools', App\Http\Controllers\API\SchoolAPIController::class)
         ->middleware('userType:super_admin,admin');
 
@@ -114,6 +114,15 @@ Route::middleware('auth:api')->group(function () {
 
     Route::resource('payment-methods', App\Http\Controllers\API\PaymentMethodAPIController::class);
 
+    // Parent routes - Only parents can access
+    Route::prefix('parent')->middleware('userType:parent')->group(function () {
+        Route::get('/children', [App\Http\Controllers\API\ParentAPIController::class, 'getChildren']);
+        Route::get('/children/results', [App\Http\Controllers\API\ParentAPIController::class, 'getChildrenResults']);
+        Route::get('/children/payments', [App\Http\Controllers\API\ParentAPIController::class, 'getChildrenPayments']);
+        Route::get('/dashboard', [App\Http\Controllers\API\ParentAPIController::class, 'getDashboardData']);
+        Route::get('/events', [App\Http\Controllers\API\ParentAPIController::class, 'getEvents']);
+    });
 
 });
+
 
