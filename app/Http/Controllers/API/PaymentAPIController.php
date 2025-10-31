@@ -71,95 +71,119 @@ class PaymentAPIController extends AppBaseController
         return $this->sendResponse($payment->toArray(), 'Payment updated successfully');
     }
 
-    private function getToken()
+     /**
+     * 🚀 Initialize Paystack Payment
+     *
+     * This method sends a payment initialization request to Paystack
+     * and returns the authorization URL for frontend redirection.
+     */
+    public function initializePaystackPayment(Request $request): JsonResponse
     {
-        $url = env('PESAPAL_ENV') === 'sandbox'
-            ? "https://cybqa.pesapal.com/pesapalv3/api/Auth/RequestToken"
-            : "https://pay.pesapal.com/v3/api/Auth/RequestToken";
+        $student = $request->student_id;
+        $amount = $request->amount; // Amount in KES or NGN (convert to kobo if NGN)
+        $email = $request->email;   // Payer’s email
 
-        $response = Http::withHeaders([
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json'
-        ])->withBasicAuth(
-            env('PESAPAL_CONSUMER_KEY'),
-            env('PESAPAL_CONSUMER_SECRET')
-        )->post($url);
+        $response = Http::withToken(config('services.paystack.secret_key'))
+            ->post('https://api.paystack.co/transaction/initialize', [
+                'email' => $email,
+                'amount' => $amount * 100, // Paystack uses kobo
+                'currency' => $request->currency ?? 'KES',
+                'callback_url' => url('/api/payments/verify'),
+                'metadata' => [
+                    'student_id' => $student,
+                    'school_id' => auth()->user()->school_id,
+                ]
+            ]);
 
-        if ($response->failed()) {
-            Log::error("Pesapal Auth Error: " . $response->body());
-            return null;
+        $data = $response->json();
+
+        if (!$response->successful()) {
+            Log::error('Paystack Init Failed', $data);
+            return $this->sendError('Payment initialization failed.', $data, 400);
         }
 
-        return $response['token'] ?? null;
-    }
-
-    /**
-     * Start a payment request
-     */
-    public function initiatePayment(Request $request)
-    {
-        $amount = $request->amount;
-        $studentId = $request->student_id;
-
-        $token = $this->getToken();
-        $merchantRef = uniqid('ORDER-');
-
-        $order = [
-            "id" => $merchantRef,
-            "currency" => "KES",
-            "amount" => $amount,
-            "description" => "School Fee Payment",
-            "callback_url" => env('PESAPAL_CALLBACK_URL'),
-            "notification_id" => "student-" . $studentId,
-            "billing_address" => [
-                "email_address" => "parent@example.com",
-                "phone_number" => "2547XXXXXXXX",
-                "first_name" => "Parent",
-                "last_name" => "Name"
-            ]
-        ];
-
-        $url = env('PESAPAL_ENV') === 'sandbox'
-            ? "https://cybqa.pesapal.com/pesapalv3/api/Transactions/SubmitOrderRequest"
-            : "https://pay.pesapal.com/v3/api/Transactions/SubmitOrderRequest";
-
-        $response = Http::withToken($token)->post($url, $order);
-        $resBody = $response->json();
-
-        // Save transaction in DB
-        Transaction::create([
-            'student_id' => $studentId,
-            'payment_id' => $request->payment_id ?? null,
-            'pesapal_merchant_reference' => $merchantRef,
+        // Save initial payment record
+        Payment::create([
+            'student_id' => $student,
             'amount' => $amount,
-            'currency' => 'KES',
+            'currency' => $request->currency ?? 'KES',
             'status' => 'PENDING',
-            'raw_response' => $resBody
+            'description' => 'Tuition Payment Initialization',
+            'callback_data' => $data,
+            'school_id' => auth()->user()->school_id,
         ]);
 
-        return response()->json($resBody);
+        return $this->sendResponse($data['data'], 'Redirect user to authorization_url to complete payment.');
     }
 
-    /**
-     * Pesapal callback
+     /**
+     * ✅ Verify Paystack Payment
+     *
+     * This method verifies the transaction status from Paystack
+     * using the transaction reference after payment is completed.
      */
-    public function handleCallback(Request $request)
+    public function verifyPaystackPayment(Request $request): JsonResponse
     {
-        $reference = $request->input('OrderMerchantReference'); // our unique id
-        $trackingId = $request->input('OrderTrackingId');
-        $status = $request->input('status');
+        $reference = $request->reference;
 
-        $transaction = Transaction::where('pesapal_merchant_reference', $reference)->first();
+        $response = Http::withToken(config('services.paystack.secret_key'))
+            ->get("https://api.paystack.co/transaction/verify/{$reference}");
 
-        if ($transaction) {
-            $transaction->update([
-                'pesapal_tracking_id' => $trackingId,
-                'status' => strtoupper($status),
-                'raw_response' => $request->all()
+        $data = $response->json();
+
+        if (!$response->successful()) {
+            Log::error('Paystack Verification Failed', $data);
+            return $this->sendError('Payment verification failed.', $data, 400);
+        }
+
+        $paymentData = $data['data'];
+
+        $payment = Payment::where('student_id', $paymentData['metadata']['student_id'])
+            ->where('status', 'PENDING')
+            ->latest()
+            ->first();
+
+        if ($payment) {
+            $payment->update([
+                'status' => strtoupper($paymentData['status']),
+                'transaction_id' => $paymentData['id'],
+                'callback_data' => $paymentData,
             ]);
         }
 
-        return response()->json(['message' => 'Callback processed']);
+        return $this->sendResponse($paymentData, 'Payment verified successfully');
+    }
+
+    /**
+     * 🔄 Handle Paystack Webhook (Optional)
+     *
+     * This endpoint automatically updates payment status when Paystack
+     * sends a webhook notification to your system.
+     */
+    public function handlePaystackWebhook(Request $request)
+    {
+        $payload = $request->all();
+        Log::info('Paystack Webhook Received:', $payload);
+
+        $reference = $payload['data']['reference'] ?? null;
+
+        if ($reference) {
+            $response = Http::withToken(config('services.paystack.secret_key'))
+                ->get("https://api.paystack.co/transaction/verify/{$reference}")
+                ->json();
+
+            $paymentData = $response['data'] ?? null;
+
+            if ($paymentData) {
+                Payment::where('transaction_id', $paymentData['id'])
+                    ->update([
+                        'status' => strtoupper($paymentData['status']),
+                        'callback_data' => $paymentData,
+                    ]);
+            }
+        }
+
+        return response()->json(['status' => 'success'], 200);
     }
 
     public function destroy($id): JsonResponse

@@ -21,6 +21,12 @@ return [
         'scheme' => 'https',
     ],
 
+    'africastalking' => [
+    'username' => env('AFRICASTALKING_USERNAME', 'RTECHSMART'),
+    'key'      => env('AFRICASTALKING_API_KEY'),
+],
+
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
@@ -30,5 +36,13 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+
+    'paystack' => [
+    'public_key' => env('PAYSTACK_PUBLIC_KEY'),
+    'secret_key' => env('PAYSTACK_SECRET_KEY'),
+    'payment_url' => env('PAYSTACK_PAYMENT_URL'),
+    'merchant_email' => env('MERCHANT_EMAIL'),
+],
+
 
 ];

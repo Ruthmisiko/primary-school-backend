@@ -20,7 +20,7 @@ class Payment extends Model
         'status',
         'description',
         'callback_data',
-        'student_id'   // raw response from Pesapal (optional, JSON)
+        'student_id'
     ];
 
     // Casts (automatically convert data types)

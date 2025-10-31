@@ -3,8 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\Auth\AuthController;
-use App\Http\Controllers\API\Auth\AccessTokenController;
+use App\Http\Controllers\API\ParentSMSController;
+use App\Http\Controllers\API\PaymentAPIController;
 use App\Http\Controllers\API\SettingAPIController;
+use App\Http\Controllers\API\Auth\AccessTokenController;
 
 
 /*
@@ -54,6 +56,7 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('dashboards', App\Http\Controllers\API\dashboardAPIController::class);
 
     Route::get('dashboard/enrollment-stats', [App\Http\Controllers\API\dashboardAPIController::class, 'getEnrollmentStats']);
+
     Route::get('dashboard/expense-stats', [App\Http\Controllers\API\dashboardAPIController::class, 'getExpenseStats']);
 
     Route::resource('payments', App\Http\Controllers\API\PaymentAPIController::class);
@@ -81,6 +84,11 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('suppliers', App\Http\Controllers\API\SupplierAPIController::class);
 
     Route::resource('events', App\Http\Controllers\API\EventAPIController::class);
+
+    Route::post('/sms/parent/{id}', [ParentSMSController::class, 'sendToOne']);
+
+     Route::post('/sms/parents/send-all', [ParentSMSController::class, 'sendToAll']);
+
 
     Route::resource('schools', App\Http\Controllers\API\SchoolAPIController::class)
         ->middleware('userType:super_admin,admin');
@@ -113,6 +121,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/pesapal/callback', [App\Http\Controllers\API\PaymentAPIController::class, 'handleCallback']);
 
     Route::resource('payment-methods', App\Http\Controllers\API\PaymentMethodAPIController::class);
+
+    Route::post('/payments/initiate', [PaymentAPIController::class, 'initializePaystackPayment']);
+    Route::get('/payments/verify', [PaymentAPIController::class, 'verifyPaystackPayment']);
+    Route::post('/payments/webhook', [PaymentAPIController::class, 'handlePaystackWebhook']);
+
 
     // Parent routes - Only parents can access
     Route::prefix('parent')->middleware('userType:parent')->group(function () {
