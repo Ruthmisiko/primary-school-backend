@@ -21,20 +21,27 @@ class ParentSMSController extends AppBaseController
         return response()->json(['status' => 'queued', 'parent_id' => $parent->id]);
     }
 
-    // Send to all parents (chunked to avoid memory issues)
     public function sendToAll(Request $request)
     {
-        $request->validate(['message' => 'required|string|max:320']);
-        $message = $request->input('message');
+        $request->validate([
+            'message' => 'required|string|max:320',
+        ]);
 
-        StudentParent::chunk(100, function($parents) use ($message) {
-            foreach ($parents as $parent) {
-                SendParentSMSJob::dispatch($parent->id, $message);
-            }
-        });
+        $message = $request->message;
 
-        return response()->json(['status' => 'queued_all']);
+        StudentParent::whereNotNull('phone_number')
+            ->select('id')
+            ->chunk(100, function ($parents) use ($message) {
+                foreach ($parents as $parent) {
+                    SendParentSMSJob::dispatch($parent->id, $message);
+                }
+            });
+
+        return response()->json([
+            'success' => true,
+            'status' => 'queued_all',
+            'message' => 'SMS queued for all parents',
+        ]);
     }
 
-    // Example: send to parents of a class, or filtered list — adapt as needed
 }

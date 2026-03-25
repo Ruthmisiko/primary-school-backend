@@ -126,6 +126,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/payments/verify', [PaymentAPIController::class, 'verifyPaystackPayment']);
     Route::post('/payments/webhook', [PaymentAPIController::class, 'handlePaystackWebhook']);
 
+    Route::resource('staffs', App\Http\Controllers\API\HrmStaffAPIController::class);
 
     // Parent routes - Only parents can access
     Route::prefix('parent')->middleware('userType:parent')->group(function () {
@@ -137,5 +138,7 @@ Route::middleware('auth:api')->group(function () {
     });
 
 });
+
+
 
 

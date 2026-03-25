@@ -1,17 +1,24 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class AlterClassIdColumnOnStudentsTable extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        DB::statement('ALTER TABLE students ALTER COLUMN class_id TYPE BIGINT USING class_id::BIGINT');
+        Schema::table('students', function (Blueprint $table) {
+            // Correct MySQL syntax
+            $table->bigInteger('class_id')->change();
+        });
     }
 
-    public function down()
+    public function down(): void
     {
-        DB::statement('ALTER TABLE students ALTER COLUMN class_id TYPE VARCHAR');
+        Schema::table('students', function (Blueprint $table) {
+            // Rollback to original type (assuming it was integer)
+            $table->integer('class_id')->change();
+        });
     }
-};
+}

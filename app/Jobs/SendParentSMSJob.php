@@ -3,8 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\StudentParent;
-use App\Models\SmsLog;
-use App\Services\SMSService;
+use App\Services\AfricasTalkingSMSService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,50 +18,43 @@ class SendParentSMSJob implements ShouldQueue
     public int $parentId;
     public string $message;
 
-    public $tries = 3;        // retry policy
-    public $backoff = 60;     // seconds between retries
-
     public function __construct(int $parentId, string $message)
     {
         $this->parentId = $parentId;
         $this->message = $message;
     }
 
-    public function handle(SMSService $smsService): void
+    public function handle(AfricasTalkingSMSService $smsService)
     {
         $parent = StudentParent::find($this->parentId);
-        if (! $parent) {
-            Log::warning("Parent not found for SMS job: {$this->parentId}");
+
+        if (!$parent || !$parent->phone_number) {
             return;
         }
 
-        $phone = toE164($parent->phone_number);
-        // create log as queued
-        $log = SmsLog::create([
-            'parent_id'   => $parent->id,
-            'phone_number'=> $phone,
-            'message'     => $this->message,
-            'status'      => 'queued',
+        $phone = $this->normalizePhone($parent->phone_number);
+
+        $response = $smsService->send($phone, $this->message);
+
+        Log::info('Parent SMS sent', [
+            'parent_id' => $this->parentId,
+            'phone' => $phone,
+            'response' => $response,
         ]);
+    }
 
-        $resp = $smsService->send($phone, $this->message);
+    private function normalizePhone(string $phone): string
+    {
+        $phone = preg_replace('/\s+/', '', $phone);
 
-        // optional: log success/failure
-        if (is_null($resp)) {
-            Log::error("SMS failed for parent {$this->parentId}", ['phone' => $phone]);
-            $log->update([
-                'status' => 'failed',
-                'response_json' => null,
-                'sent_at' => now(),
-            ]);
-            // throw new \Exception('SMS failed'); // if you want to trigger job retry
-        } else {
-            Log::info("SMS sent to parent {$this->parentId}", ['phone' => $phone, 'response' => $resp]);
-            $log->update([
-                'status' => 'sent',
-                'response_json' => json_encode($resp),
-                'sent_at' => now(),
-            ]);
+        if (str_starts_with($phone, '0')) {
+            return '254' . substr($phone, 1);
         }
+
+        if (str_starts_with($phone, '+')) {
+            return ltrim($phone, '+');
+        }
+
+        return $phone;
     }
 }
